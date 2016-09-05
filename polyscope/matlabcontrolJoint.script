@@ -1,0 +1,133 @@
+def matlabcontrolJoint():
+  set_analog_inputrange(0, 0)
+  set_analog_inputrange(1, 0)
+  set_analog_inputrange(2, 0)
+  set_analog_inputrange(3, 0)
+  set_analog_outputdomain(0, 0)
+  set_analog_outputdomain(1, 0)
+  set_tool_voltage(0)
+  set_runstate_outputs([])
+  set_payload(0.0)
+  set_gravity([0.0, 0.0, 9.82])
+  $ 38 "SubProgram_1"
+  def SubProgram_1():
+    receive_data=socket_read_ascii_float(6)
+    if (receive_data[0] !=6):
+      socket_send_string("0")
+    else:
+      socket_send_string("1")
+      global pointer = 0
+      varmsg("pointer",pointer)
+      while (pointer <receive_data[0]):
+        Move_To_Joints[pointer]=receive_data[pointer+1]
+        global pointer = pointer+1
+        varmsg("pointer",pointer)
+      end
+      global task = [0,0]
+      varmsg("task",task)
+    end
+  end
+  $ 49 "SubProgram_2"
+  def SubProgram_2():
+    pose_1=get_joint_positions()
+    socket_send_string(pose_1)
+  end
+  $ 52 "SubProgram_3"
+  def SubProgram_3():
+    pose_1=get_joint_positions()
+    global pointer = 0
+    varmsg("pointer",pointer)
+    while (pointer <receive_data[0]):
+      Move_To_Joints[pointer]=pose_1[pointer]
+      global pointer = pointer+1
+      varmsg("pointer",pointer)
+    end
+  end
+  $ 1 "BeforeStart"
+  $ 2 "receive_data≔[6,0,0,0,0,0,0]"
+  global receive_data = [6,0,0,0,0,0,0]
+  varmsg("receive_data",receive_data)
+  $ 3 "Move_To_Joints≔[0,-1.5708,0,-1.5708,0,0]"
+  global Move_To_Joints = [0,-1.5708,0,-1.5708,0,0]
+  varmsg("Move_To_Joints",Move_To_Joints)
+  $ 4 "Call SubProgram_3"
+  SubProgram_3()
+  $ 5 "socket_open('172.22.22.1',30000)"
+  socket_open("172.22.22.1",30000)
+  $ 6 "task≔[0,0]"
+  global task = [0,0]
+  varmsg("task",task)
+  $ 7 "coop≔0"
+  global coop = 0
+  varmsg("coop",coop)
+  $ 28 "Thread_1"
+  thread Thread_1():
+    while True:
+      if (coop ==1):
+        while (coop ==1):
+          thread Force_properties_calculation_thread_31():
+            while (True):
+              force_mode(p[0.0,0.0,0.0,0.0,0.0,0.0], [1, 1, 1, 1, 1, 1], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 2, [0.15, 0.15, 0.15, 1.0471975511965976, 1.0471975511965976, 1.0471975511965976])
+              sync()
+            end
+          end
+          global thread_handler_31 = run Force_properties_calculation_thread_31()
+          sleep(0.01)
+          kill thread_handler_31
+          end_force_mode()
+        end
+        global coop = 0
+        varmsg("coop",coop)
+        SubProgram_3()
+      else:
+        movej(Move_To_Joints,a=1.0,v=0.6,r=0)
+        sleep(0.01)
+      end
+    end
+  end
+  threadId_Thread_1 = run Thread_1()
+  while (True):
+    $ 8 "Robot Program"
+    $ 13 "task=socket_read_ascii_float(1)"
+    task=socket_read_ascii_float(1)
+    $ 14 "If task[1]≟2"
+    if (task[1] ==2):
+      $ 15 "Call SubProgram_2"
+      SubProgram_2()
+      $ 16 "task≔[0,0]"
+      global task = [0,0]
+      varmsg("task",task)
+    else:
+      $ 17 "ElseIf task[1]≟3"
+      if (task[1] ==3):
+        $ 18 "coop≔1"
+        global coop = 1
+        varmsg("coop",coop)
+        $ 19 "socket_send_string('1')"
+        socket_send_string("1")
+        $ 20 "task≔[0,0]"
+        global task = [0,0]
+        varmsg("task",task)
+      else:
+        $ 21 "ElseIf task[1]≟4"
+        if (task[1] ==4):
+          $ 22 "coop≔0"
+          global coop = 0
+          varmsg("coop",coop)
+          $ 23 "socket_send_string('1')"
+          socket_send_string("1")
+          $ 24 "task≔[0,0]"
+          global task = [0,0]
+          varmsg("task",task)
+        else:
+          $ 25 "ElseIf task[1]≟1"
+          if (task[1] ==1):
+            $ 26 "Call SubProgram_1"
+            SubProgram_1()
+          end
+        end
+      end
+    end
+    $ 27 "Wait: 0"
+  end
+end
