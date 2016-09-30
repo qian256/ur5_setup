@@ -9,7 +9,7 @@ def matlabcontrolJoint():
   set_runstate_outputs([])
   set_payload(0.0)
   set_gravity([0.0, 0.0, 9.82])
-  $ 38 "SubProgram_1"
+  $ 40 "SubProgram_1"
   def SubProgram_1():
     receive_data=socket_read_ascii_float(6)
     if (receive_data[0] !=6):
@@ -27,12 +27,12 @@ def matlabcontrolJoint():
       varmsg("task",task)
     end
   end
-  $ 49 "SubProgram_2"
+  $ 51 "SubProgram_2"
   def SubProgram_2():
     pose_1=get_joint_positions()
     socket_send_string(pose_1)
   end
-  $ 52 "SubProgram_3"
+  $ 54 "SubProgram_3"
   def SubProgram_3():
     pose_1=get_joint_positions()
     global pointer = 0
@@ -60,20 +60,20 @@ def matlabcontrolJoint():
   $ 7 "coop≔0"
   global coop = 0
   varmsg("coop",coop)
-  $ 28 "Thread_1"
+  $ 30 "Thread_1"
   thread Thread_1():
     while True:
       if (coop ==1):
         while (coop ==1):
-          thread Force_properties_calculation_thread_31():
+          thread Force_properties_calculation_thread_33():
             while (True):
               force_mode(p[0.0,0.0,0.0,0.0,0.0,0.0], [1, 1, 1, 1, 1, 1], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 2, [0.15, 0.15, 0.15, 1.0471975511965976, 1.0471975511965976, 1.0471975511965976])
               sync()
             end
           end
-          global thread_handler_31 = run Force_properties_calculation_thread_31()
+          global thread_handler_33 = run Force_properties_calculation_thread_33()
           sleep(0.01)
-          kill thread_handler_31
+          kill thread_handler_33
           end_force_mode()
         end
         global coop = 0
@@ -100,34 +100,36 @@ def matlabcontrolJoint():
     else:
       $ 17 "ElseIf task[1]≟3"
       if (task[1] ==3):
-        $ 18 "coop≔1"
-        global coop = 1
-        varmsg("coop",coop)
-        $ 19 "socket_send_string('1')"
+        $ 18 "Set DO[0]=Off"
+        set_digital_out(0,False)
+        $ 19 "Set DO[1]=On"
+        set_digital_out(1,True)
+        $ 20 "socket_send_string('1')"
         socket_send_string("1")
-        $ 20 "task≔[0,0]"
+        $ 21 "task≔[0,0]"
         global task = [0,0]
         varmsg("task",task)
       else:
-        $ 21 "ElseIf task[1]≟4"
+        $ 22 "ElseIf task[1]≟4"
         if (task[1] ==4):
-          $ 22 "coop≔0"
-          global coop = 0
-          varmsg("coop",coop)
-          $ 23 "socket_send_string('1')"
+          $ 23 "Set DO[1]=Off"
+          set_digital_out(1,False)
+          $ 24 "Set DO[0]=On"
+          set_digital_out(0,True)
+          $ 25 "socket_send_string('1')"
           socket_send_string("1")
-          $ 24 "task≔[0,0]"
+          $ 26 "task≔[0,0]"
           global task = [0,0]
           varmsg("task",task)
         else:
-          $ 25 "ElseIf task[1]≟1"
+          $ 27 "ElseIf task[1]≟1"
           if (task[1] ==1):
-            $ 26 "Call SubProgram_1"
+            $ 28 "Call SubProgram_1"
             SubProgram_1()
           end
         end
       end
     end
-    $ 27 "Wait: 0"
+    $ 29 "Wait: 0"
   end
 end

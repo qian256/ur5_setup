@@ -16,11 +16,13 @@
        Call SubProgram_2
        task≔[0,0]
      ElseIf task[1]≟3
-       coop≔1
+       Set DO[0]=Off
+       Set DO[1]=On
        socket_send_string("1")
        task≔[0,0]
      ElseIf task[1]≟4
-       coop≔0
+       Set DO[1]=Off
+       Set DO[0]=On
        socket_send_string("1")
        task≔[0,0]
      ElseIf task[1]≟1
