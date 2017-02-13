@@ -1,6 +1,6 @@
 UR5 Complete Setup Guide
 ===
-Author: Long Qian
+Author: [Long Qian](http://longqian.me/aboutme)
 
 Date: 2016-09-05
 
